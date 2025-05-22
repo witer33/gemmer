@@ -29,10 +29,13 @@ Auto-analysis
 
 <:{model}>
 <#Additional info#Prompt :{prompt}>
+<Remote address :{address}> | <Remote port :{port}>
 
 <##Options##Do not ask before executing code:{code_execution}>{checkboxes}>
 """,    {
             'prompt': Form.StringInput(),
+            'address': Form.StringInput(),
+            'port': Form.StringInput(),
             'model' : Form.EmbeddedChooserControl(ModelChooser("Model", [[i] for i in models], 0)),
             'checkboxes': Form.ChkGroupControl(("code_execution", )),
         })
@@ -44,10 +47,14 @@ class Analysis(ida_kernwin.action_handler_t):
         self.client = genai.Client(api_key=os.getenv("GEMINI_KEY"))
         self.running = False
 
-    def worker(self, prompt: str = ""):
+    def worker(self, prompt: str = "", address: str = "", port: str = ""):
             self.running = True
             try:
-                response = self.chat.send_message(get_code("main") + (f"\n\n{prompt}" if prompt else ""))
+                response = self.chat.send_message(
+                    get_code("main") 
+                    + (f"\n\n{prompt}" if prompt else "")
+                    + (f"\n\nRemote address: {address}\nRemote port: {port}" if address and port else "")
+                )
                 ida_kernwin.msg(f"Response: {response.text}\n")
                 if response.prompt_feedback:
                     ida_kernwin.msg(f"Feedback: {response.prompt_feedback}\n")
@@ -82,11 +89,11 @@ class Analysis(ida_kernwin.action_handler_t):
                 model=model,
                 config=types.GenerateContentConfig(
                     tools=[get_code, get_global_data, get_bytes, execute_code(not form.code_execution.checked)], # types.Tool(code_execution=types.ToolCodeExecution)
-                    system_instruction="Act as a reverse engineer participating in a CTF. You will receive the decompiled code of a C main function of a CTF challenge, if you need the code of other functions or the data of global variables call the relevant function. Your goal is to find the hidden flag. If needed write a python script and execute it using execute_code (you can use z3, angr and all common rev libraries). When calling functions do not include a message as it will not be processed."
+                    system_instruction="Act as a reverse engineer and pwn expert participating in a CTF. You will receive the decompiled code of a C main function of a CTF challenge, if you need the code of other functions or the data of global variables call the relevant function. Your goal is to find the hidden flag. If needed write a python script and execute it using execute_code (you can use z3, angr and all common rev libraries). A challenge can have a remote address and port, use pwntools to interact with it. When calling functions do not include a message as it will not be processed."
                 ),
             )
             
-            threading.Thread(target=self.worker, args=(form.prompt.value, )).start()
+            threading.Thread(target=self.worker, args=(form.prompt.value, form.address.value, form.port.value)).start()
             ida_kernwin.msg("Thread started\n")
         finally:
             form.Free()
