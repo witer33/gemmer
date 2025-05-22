@@ -1,0 +1,13 @@
+{
+    "IDAMetadataDescriptorVersion": 1,
+    "plugin": {
+        "name": "gemmer",
+        "entryPoint": "main.py",
+        "categories": [
+            "disassembly-and-processor-modules"
+        ],
+        "idaVersions": "9.1",
+        "description": "This plugin performs an analysis of the code with AI",
+        "version": "0.0.1"
+    }
+}
