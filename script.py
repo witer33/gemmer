@@ -1,6 +1,7 @@
 from utils import get_code, get_global_data, get_bytes, execute_code, main_thread
 import ida_auto
 import ida_kernwin
+import ida_name
 
 from google import genai
 from google.genai import types
@@ -31,6 +32,9 @@ class Gemmer(ida_kernwin.action_handler_t):
         if self.running:
             ida_kernwin.msg("Already running\n")
             return 0
+        if not ida_name.get_name_ea(0, "main"):
+            ida_kernwin.msg("No main function found\n")
+            return 0        
         self.running = True
         
         ida_kernwin.msg("Starting analysis\n")
