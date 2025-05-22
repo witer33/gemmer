@@ -50,7 +50,7 @@ def get_code(func_name: str) -> str:
 
 def execute_code(ask: bool = True):
     @main_thread
-    def _execute_code(code: str) -> str:
+    def execute_code(code: str) -> str:
         """
         Execute Python code in a temporary file if the user agrees.
         Args:
@@ -72,7 +72,7 @@ def execute_code(ask: bool = True):
                     return f"Error executing code: {result.stderr}"
             except Exception as e:
                 return f"Execution failed: {str(e)}"
-    return _execute_code
+    return execute_code
 
 
 @main_thread
