@@ -1,5 +1,5 @@
 # Gemmer
-Useless IDA Pro plugin because yes
+Useless IDA Pro plugin because yes 🍕🤌🏻
 ## Install
 ```bash
 # replace ida-pro-9.1 with your ida directory
